@@ -11,7 +11,9 @@ Go to the file /etc/ssh/sshd_config.d/60-cloudimg-settings.conf
 Update PasswordAuthentication yes
 Restart SSH -> sudo systemctl restart ssh
 
+
 ssh -o ' IdentityFile /media/sf_shared_folder/deploy_1.pem' 'ubuntu@3.64.58.29'
+
 
 https://galaxy.ansible.com/ui/standalone/roles/bsmeding/docker/
 ansible-galaxy role init <name> => ansible-galaxy role install bsmeding.docker
