@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  connection: local
+
+  tasks:
+    - name: create ec2 instances
+      amazon.aws.ec2_instance:
+        name: "{{ item.name }}"
+        # key_name: "my_key"
+        key_name: "ansible_key"
+        instance_type: t2.micro
+        security_group: default
+        region: us-east-1
+        aws_access_key: "{{ ec2_access_key }}"
+        aws_secret_key: "{{ ec2_secret_key }}"
+        network_interfaces:
+          - assign_public_ip: true
+        image_id: "{{ item.image }}"
+        tags:
+          Environment: "{{ item.name }}"
+      loop:
+        - { image: "ami-0e86e20dae9224db8", name: "manage-ubuntu-node-1" } # ubuntu
+        - { image: "ami-0e86e20dae9224db8", name: "manage-ubuntu-node-2" } # ubuntu
+        - { image: "ami-0ebfd941bbafe70c6", name: "manage-amazon-linux-node-3" } # amazon linux

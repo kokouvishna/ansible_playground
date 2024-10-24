@@ -1,0 +1,78 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Make sure the packages openssh and openssl are up to date
+      apt:
+        name: "{{ item }}"
+        state: latest
+      loop:
+        - openssh
+        - openssl
+      ignore_errors: yes
+
+    - name: Verifiy if docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_output
+      ignore_errors: yes
+    # - ansible.builtin.debug:
+    #     var: docker_output
+
+    - name: Update all packages using the apt repositories
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: Install docker required system packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - ca-certificates
+        - curl
+      when:
+        docker_output.failed
+
+    - name: Add Docker apt key.
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+        force: true
+    #   register: add_docker_repository_key
+    # - debug:
+    #     var: add_docker_repository_key
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu noble stable
+        state: present
+
+    - name: Update all packages using the apt repositories
+      apt:
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
+
+    - name: Verifiy if docker is installed again
+      ansible.builtin.command: docker --version
+      register: second_docker_output
+      ignore_errors: yes
+
+    - name: Install the docker packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - docker-ce 
+        - docker-ce-cli 
+        - containerd.io 
+        - docker-buildx-plugin 
+        - docker-compose-plugin
+
+
